@@ -1,0 +1,13 @@
+{
+	"name": "@willherzog/modal-window",
+	"version": "1.0.0",
+	"description": "An ECMAScript class for handling modal window/dialog functionality.",
+    "license": "MIT",
+	"author": "Will Herzog <willherzog@gmail.com>",
+	"homepage": "https://github.com/willherzog/modal-window",
+	"bugs": {
+		"url": "https://github.com/willherzog/modal-window/issues"
+	},
+	"repository": "willherzog/modal-window",
+	"browser": "./modal-window.mjs"
+}
