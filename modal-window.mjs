@@ -102,6 +102,38 @@ export default class ModalWindow
 		modal.get().setAttribute('aria-labelledby', headingIdAttr);
 	}
 
+	/**
+	 * A generic utility method - similar to Element.closest() except that it stops searching
+	 * once it reaches the element on which EventTarget.addEventListener() was called.
+	 *
+	 * Inspired by the `passedThrough()` function of this solution:
+	 * {@link https://gist.github.com/evenicoulddoit/9769f78e9a6f359c4561}
+	 *
+	 * @param {Event} event
+	 * @param {string} selector
+	 */
+	static #findDelegatedTarget(event, selector) {
+		if( typeof event !== 'object' || !(event instanceof Event) ) {
+			throw new TypeError('The "event" argument must be an instance of Event.');
+		}
+
+		if( !event.target ) {
+			return null;
+		}
+
+		let targetCandidate = event.target;
+
+		do {
+			if( targetCandidate.matches(selector) ) {
+				return targetCandidate;
+			} else {
+				targetCandidate = targetCandidate.parentNode;
+			}
+		} while( targetCandidate !== null && targetCandidate !== event.currentTarget && targetCandidate !== document.body );
+
+		return null;
+	}
+
 	//---- Instance properties ----//
 
 	/** @type {number} */
@@ -223,14 +255,12 @@ export default class ModalWindow
 		if( existingModalElements.length === 0 ) {
 			if( this.#config.trapFocus ) {
 				Array.from(document.body.children).forEach(element => {
-					if( element.classList.contains(ModalWindow.inertExemptClass) ) {
-						return;
-					}
-
-					if( element.inert ) {
-						element.dataSet.alreadyInert = true; // prevent making these non-inert when dialog is closed
-					} else {
-						element.inert = true;
+					if( element instanceof HTMLElement && !element.classList.contains(ModalWindow.inertExemptClass) ) {
+						if( element.inert ) {
+							element.dataset.alreadyInert = '1'; // prevent making these non-inert when dialog is closed
+						} else {
+							element.inert = true;
+						}
 					}
 				});
 			}
@@ -306,13 +336,13 @@ export default class ModalWindow
 			if( typeof this.#deferredId === 'string' ) {
 				this.#dialogNode.setAttribute('id', this.#deferredId);
 
-				delete this.#deferredId;
+				this.#deferredId = undefined;
 			}
 
 			if( typeof this.#deferredClass === 'string' ) {
 				this.#dialogNode.classList.add(this.#deferredClass);
 
-				delete this.#deferredClass;
+				this.#deferredClass = undefined;
 			}
 
 			this.#dialogNode.innerHTML = htmlContent;
@@ -329,6 +359,53 @@ export default class ModalWindow
 				this.#dialogNode.removeAttribute('aria-labelledby');
 			}
 		}
+	}
+
+	/**
+	 * Inspired by custom `addEventListener()` function from {@link https://youmightnotneedjquery.com/#on}.
+	 *
+	 * @param {string} eventName
+	 * @param {string} selector
+	 * @param {Function} handler
+	 */
+	addDelegatedEventListener(eventName, selector, handler) {
+		const handlerWrapper = event => {
+			const element = ModalWindow.#findDelegatedTarget(event, selector);
+
+			if( element !== null ) {
+				handler.call(element, event);
+			}
+		};
+
+		this.#dialogNode.addEventListener(eventName, handlerWrapper);
+
+		return handlerWrapper;
+	}
+
+	/**
+	 * A shortcut version of `addDelegatedEventListener()` specifically for triggering the `remove()`
+	 * method of this instance of `ModalWindow`; uses the "click" event by default.
+	 *
+	 * @param {string} eventNameOrSelector
+	 * @param {string} [selector]
+	 */
+	addDelegatedDialogRemover(eventNameOrSelector, selector) {
+		let eventName;
+
+		if( typeof selector === 'undefined' ) {
+			eventName = 'click';
+			selector = eventNameOrSelector;
+		} else {
+			eventName = eventNameOrSelector;
+		}
+
+		this.#dialogNode.addEventListener(eventName, event => {
+			const element = ModalWindow.#findDelegatedTarget(event, selector);
+
+			if( element !== null ) {
+				this.remove.call(this);
+			}
+		});
 	}
 
 	remove() {
@@ -352,14 +429,12 @@ export default class ModalWindow
 
 			if( existingModalWindows.length === 0 ) {
 				Array.from(document.body.children).forEach(element => {
-					if( element.classList.contains(ModalWindow.inertExemptClass) ) {
-						return;
-					}
-
-					if( !element.dataSet.alreadyInert ) {
-						this.inert = false; // only do this for elements which were made inert when dialog was opened
-					} else {
-						delete element.dataSet.alreadyInert;
+					if( element instanceof HTMLElement && !element.classList.contains(ModalWindow.inertExemptClass) ) {
+						if( element.dataset.alreadyInert === undefined ) {
+							element.inert = false; // only do this for elements which were made inert when dialog was opened
+						} else {
+							delete element.dataset.alreadyInert;
+						}
 					}
 				});
 			} else {
