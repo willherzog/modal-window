@@ -1,2 +1,2 @@
 # ModalWindow
- An ECMAScript class for handling modal window/dialog functionality.
+ An ECMAScript class—with no dependencies—for handling modal window/dialog functionality.
