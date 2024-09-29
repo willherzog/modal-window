@@ -111,6 +111,8 @@ export default class ModalWindow
 	 *
 	 * @param {Event} event
 	 * @param {string} selector
+	 *
+	 * @returns {EventTarget | null}
 	 */
 	static #findDelegatedTarget(event, selector) {
 		if( typeof event !== 'object' || !(event instanceof Event) ) {
