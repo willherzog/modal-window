@@ -342,7 +342,7 @@ export default class ModalWindow
 			}
 
 			if( typeof this.#deferredClass === 'string' ) {
-				this.#dialogNode.setAttribute('class', this.#deferredClass);
+				this.#dialogNode.setAttribute('class', this.#dialogNode.className + this.#deferredClass);
 
 				this.#deferredClass = undefined;
 			}
