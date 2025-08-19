@@ -352,6 +352,8 @@ export default class ModalWindow
 			if( this.#config.labelByFirstHeading ) {
 				ModalWindow.#setLabelledByAttr(this);
 			}
+
+			this.#dialogNode.dispatchEvent(new Event('update'));
 		} else if( !this.isPending ) {
 			this.#isPending = true;
 
