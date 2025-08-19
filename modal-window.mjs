@@ -230,7 +230,7 @@ export default class ModalWindow
 			}
 
 			if( (typeof htmlClass === 'string') && htmlClass !== '' ) {
-				this.#dialogNode.classList.add(htmlClass);
+				this.#dialogNode.setAttribute('class', `${this.#dialogNode.className} ${htmlClass}`);
 			}
 
 			this.#dialogNode.innerHTML = htmlContent;
