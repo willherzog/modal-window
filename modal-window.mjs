@@ -206,7 +206,7 @@ export default class ModalWindow
 
 		let dialogHtml = `<div class="${ModalWindow.mainClass} ${this.#uniqueClass}"`;
 
-		dialogHtml += ` style="position: fixed; z-index: ${(ModalWindow.#baseZindex + ModalWindow.#layer)}; max-width: 98vw; max-height: 98vh; overflow-y: auto; overscroll-behavior: contain;"`;
+		dialogHtml += ` style="position: fixed; z-index: ${(ModalWindow.#baseZindex + ModalWindow.#layer)}; max-width: 98vw; max-height: 98vh; overscroll-behavior: contain;"`;
 		dialogHtml += ` role="${this.#config.isAlertDialog ? 'alertdialog' : 'dialog'}"></div>`;
 
 		let backdropHtml = `<div class="${ModalWindow.maskClass} ${this.#uniqueClass}"`;
